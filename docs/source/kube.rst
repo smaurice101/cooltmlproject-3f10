@@ -1,7 +1,7 @@
-Scaling [--solutionname--] With Kubernetes
+Scaling [cooltmlproject-3f10] With Kubernetes
 ===========================
 
-Generated On: --datetime-- UTC
+Generated On: 2024-12-07 18:41:56 UTC
 
 You can scale your solution with Kubernetes.  To do so, will will need to apply the following YAML files to your Kubernetes cluster.
 
@@ -35,13 +35,13 @@ You can scale your solution with Kubernetes.  To do so, will will need to apply 
    sudo systemctl restart docker
 
 
-Based on your TML solution [--solutionname--] - if you want to scale your application with Kubernetes - you will need to apply the following YAML files.
+Based on your TML solution [cooltmlproject-3f10] - if you want to scale your application with Kubernetes - you will need to apply the following YAML files.
 
 .. list-table::
 
    * - **YML File**
      - **Description**
-   * - :ref:`--solutionnamefile--`
+   * - :ref:`cooltmlproject-3f10.yml`
      - This is your main solution YAML file.  
  
        It MUST be applied to your Kubernetes cluster.
@@ -80,13 +80,13 @@ kubectl Apply command
 
 .. code-block:: YAML
 
-   --kubectl--
+   kubectl apply -f secrets.yml -f mysql-storage.yml -f mysql-db-deployment.yml -f cooltmlproject-3f10.yml
 
---solutionnamefile--
+cooltmlproject-3f10.yml
 ------------------------
 
 .. important::
-   Copy and Paste this YAML file: --solutionnamefile-- - and save it locally.
+   Copy and Paste this YAML file: cooltmlproject-3f10.yml - and save it locally.
 
 .. attention::
 
@@ -104,8 +104,129 @@ kubectl Apply command
 
 .. code-block:: YAML
 
-   ################# --solutionnamefile--
-   --solutionnamecode--
+   ################# cooltmlproject-3f10.yml
+   
+     apiVersion: apps/v1
+     kind: Deployment
+     metadata:
+       name: cooltmlproject-3f10
+     spec:
+       selector:
+         matchLabels:
+           app: cooltmlproject-3f10
+       replicas: 3 # tells deployment to run 1 pods matching the template
+       template:
+         metadata:
+           labels:
+             app: cooltmlproject-3f10
+         spec:
+           containers:
+           - name: cooltmlproject-3f10
+             image: maadsdocker/cooltmlproject-3f10-amd64:latest
+             volumeMounts:
+             - name: dockerpath
+               mountPath: /var/run/docker.sock
+             ports:
+             - containerPort: 49649
+             - containerPort: 58423
+             - containerPort: 56121
+             env:
+             - name: TSS
+               value: '0'
+             - name: SOLUTIONNAME
+               value: 'cooltmlproject-3f10'
+             - name: SOLUTIONDAG
+               value: 'solution_preprocessing_dag-cooltmlproject-3f10'
+             - name: GITUSERNAME
+               value: 'smaurice101'
+             - name: GITREPOURL
+               value: 'https://github.com/smaurice101/raspberrypitss.git'
+             - name: SOLUTIONEXTERNALPORT
+               value: '49649'
+             - name: CHIP
+               value: 'amd64'
+             - name: SOLUTIONAIRFLOWPORT
+               value: '58423'
+             - name: SOLUTIONVIPERVIZPORT
+               value: '56121'
+             - name: DOCKERUSERNAME
+               value: 'maadsdocker'
+             - name: CLIENTPORT
+               value: '0'
+             - name: EXTERNALPORT
+               value: '39399'
+             - name: KAFKACLOUDUSERNAME
+               value: 'MUHRHBPKJYPROKBX'
+             - name: VIPERVIZPORT
+               value: '49689'
+             - name: MQTTUSERNAME
+               value: 'smaurice'
+             - name: AIRFLOWPORT
+               value: '9000'
+             - name: GITPASSWORD
+               valueFrom:
+                 secretKeyRef:
+                  name: tmlsecrets 
+                  key: githubtoken                       
+             - name: KAFKACLOUDPASSWORD
+               valueFrom:
+                 secretKeyRef:
+                  name: tmlsecrets 
+                  key: kafkacloudpassword                      
+             - name: MQTTPASSWORD
+               valueFrom: 
+                 secretKeyRef:
+                   name: tmlsecrets 
+                   key: mqttpass                        
+             - name: READTHEDOCS
+               valueFrom:
+                 secretKeyRef:
+                   name: tmlsecrets 
+                   key: readthedocs          
+             - name: qip 
+               value: 'privategpt-service' # This is private GPT service in kubernetes
+             - name: KUBE
+               value: '1'
+             - name: step4maxrows # STEP 4 maxrows field can be adjusted here.  Higher the number more data to process, BUT more memory needed.
+               value: '400'
+             - name: step4bmaxrows # STEP 4b maxrows field can be adjusted here.  Higher the number more data to process, BUT more memory needed.
+               value: '-1'               
+             - name: step5rollbackoffsets # STEP 5 rollbackoffsets field can be adjusted here.  Higher the number more training data to process, BUT more memory needed.
+               value: '-1'                              
+             - name: step6maxrows # STEP 6 maxrows field can be adjusted here.  Higher the number more predictions to make, BUT more memory needed.
+               value: '-1'                              
+             - name: step1solutiontitle # STEP 1 solutiontitle field can be adjusted here. 
+               value: 'My Solution Title'                              
+             - name: step1description # STEP 1 description field can be adjusted here. 
+               value: 'This is an awesome real-time solution built by TSS'                                             
+           volumes: 
+           - name: dockerpath
+             hostPath:
+               path: /var/run/docker.sock
+   ---
+     apiVersion: v1
+     kind: Service
+     metadata:
+       name: cooltmlproject-3f10-service
+       labels:
+         app: cooltmlproject-3f10-service
+     spec:
+       type: NodePort #Exposes the service as a node ports
+       ports:
+       - port: 58423
+         name: p2
+         protocol: TCP
+         targetPort: 58423
+       - port: 56121
+         name: p3
+         protocol: TCP
+         targetPort: 56121
+       - port: 49649
+         name: p4
+         protocol: TCP
+         targetPort: 49649
+       selector:
+         app: cooltmlproject-3f10
 
 .. tip::
 
@@ -384,13 +505,13 @@ To visualize the dashboard you need to forward ports to your solution **deployme
 
 .. code-block::
 
-   --kube-portforward--
+   kubectl port-forward deployment/cooltmlproject-3f10 56121:56121
 
 After you forward the ports then copy/paste the viusalization URL below and run your dashboard.
 
 .. code-block::
 
-   --visualizationurl--
+   http://localhost:56121/dashboard.html?topic=iot-preprocess,iot-preprocess2&offset=-1&groupid=&rollbackoffset=400&topictype=prediction&append=0&secure=1
 
 Kubernetes Pod Access Commands
 ---------------------
